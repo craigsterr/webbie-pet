@@ -1,14 +1,16 @@
 {
   "name": "web-pet-k",
+  "homepage": "https://craigsterr.github.io/webbie-pet",
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite",
+    "dev": "vite --host",
     "preview": "vite preview",
     "zip": "npm run build && mkdir -p dist && zip -r dist/game.zip dist -x \"**/.DS_Store\"",
-    "dev": "vite --host"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "gh-pages": "^6.3.0",
     "kaplay": "^3001.0.18"
   },
   "devDependencies": {
