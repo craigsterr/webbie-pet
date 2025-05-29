@@ -12,6 +12,7 @@ loadSprite("nublin", "/sprites/pets/nublin.png");
 loadSprite("werm", "/sprites/pets/werm.png");
 loadSprite("eye", "/sprites/pets/eye.png");
 loadSprite("bg_day", "/sprites/backgrounds/morning_bg.png");
+loadSprite("bg_night", "/sprites/backgrounds/night_bg.png");
 loadSprite("button_feed", "/sprites/buttons/button_feed.png");
 loadSprite("button_feed_pressed", "/sprites/buttons/button_feed_pushed.png");
 loadSprite("button_kill", "/sprites/buttons/button_kill.png");
@@ -126,45 +127,47 @@ function addTextBubble({
 
 scene("main", () => {
   function spawnRandomPoop() {
-    wait(rand(0, 40), () => {
-      const poop = add([
-        pos(center().x + rand(0, 600), center().y + rand(0, 200)),
-        sprite("poop"),
-        anchor("center"),
-        area(),
-        scale(0.5),
-        {
-          time: 0,
-        },
-        "poop",
-      ]);
+    if (!isDead) {
+      wait(rand(0, 40), () => {
+        const poop = add([
+          pos(center().x + rand(0, 600), center().y + rand(0, 200)),
+          sprite("poop"),
+          anchor("center"),
+          area(),
+          scale(0.5),
+          {
+            time: 0,
+          },
+          "poop",
+        ]);
 
-      poopCount++;
+        poopCount++;
 
-      poop.onClick(() => {
-        var randInt = randi(0, 10);
-        if (randInt == 1) {
-          addTextBubble({
-            message: "u betta wash ya hands\n b4 u feed me nasty :p",
-          });
-        }
+        poop.onClick(() => {
+          var randInt = randi(0, 10);
+          if (randInt == 1) {
+            addTextBubble({
+              message: "u betta wash ya hands\n b4 u feed me nasty :p",
+            });
+          }
 
-        play("beep");
-        addParticles(
-          "heal",
-          "/sprites/particles/effect_heal.png",
-          mousePos().x,
-          mousePos().y
-        );
+          play("beep");
+          addParticles(
+            "heal",
+            "/sprites/particles/effect_heal.png",
+            mousePos().x,
+            mousePos().y
+          );
 
-        poop.destroy();
+          poop.destroy();
 
-        poopCount--;
+          poopCount--;
+        });
+
+        // Repeat the poop spawning
+        spawnRandomPoop();
       });
-
-      // Repeat the poop spawning
-      spawnRandomPoop();
-    });
+    }
   }
   // Constants
   const followVal = 0.1;
@@ -269,7 +272,6 @@ scene("main", () => {
       pet.pos.y += Math.sin(pet.time * 4);
 
       foodMeter -= dt();
-      // debug.log(foodMeter);
 
       if (hasBeenFed) {
         shrinkCountdown -= dt();
@@ -294,6 +296,7 @@ scene("main", () => {
     }
 
     if (isDead || (foodMeter <= 0 && !isDead)) {
+      shake();
       addTextBubble({ message: "im dead asl 💀" });
       isDead = true;
       pet.destroy();
@@ -452,12 +455,217 @@ scene("main", () => {
   });
 
   onClick("button_play", () => {
-    addTextBubble({ message: "coming soon." });
     buttonPlay.sprite = "button_play_pressed";
 
     wait(0.2, () => {
       buttonPlay.sprite = "button_play";
     });
+
+    go("play");
+  });
+});
+
+loadSprite("flame", "/sprites/particles/effect_flame.png");
+loadSprite("enemy", "/sprites/objects/enemy.png");
+loadSprite("enemy2", "/sprites/objects/enemy2.png");
+
+const hexScale = 250;
+
+const hexPoints = [
+  vec2(Math.cos(0), Math.sin(0)).scale(hexScale),
+  vec2(Math.cos(Math.PI / 3), Math.sin(Math.PI / 3)).scale(hexScale),
+  vec2(Math.cos((2 * Math.PI) / 3), Math.sin((2 * Math.PI) / 3)).scale(
+    hexScale
+  ),
+  vec2(Math.cos(Math.PI), Math.sin(Math.PI)).scale(hexScale),
+  vec2(Math.cos((4 * Math.PI) / 3), Math.sin((4 * Math.PI) / 3)).scale(
+    hexScale
+  ),
+  vec2(Math.cos((5 * Math.PI) / 3), Math.sin((5 * Math.PI) / 3)).scale(
+    hexScale
+  ),
+];
+
+function getOffscreenPosition() {
+  const margin = 100; // how far offscreen to spawn
+  const side = randi(0, 4); // 0=top, 1=bottom, 2=left, 3=right
+
+  switch (side) {
+    case 0:
+      return vec2(rand(0, width()), -margin);
+    case 1:
+      return vec2(rand(0, width()), height() + margin);
+    case 2:
+      return vec2(-margin, rand(0, height()));
+    case 3:
+      return vec2(width() + margin, rand(0, height()));
+  }
+}
+
+scene("play", () => {
+  onDraw(() => {
+    drawSprite({
+      sprite: "bg_night",
+      pos: center(),
+      anchor: "center",
+    });
+  });
+
+  function spawnEnemy() {
+    const pos1 = getOffscreenPosition();
+    const enemy = add([
+      pos(pos1),
+      sprite("enemy"),
+      anchor("center"),
+      area({ shape: new Polygon(hexPoints) }),
+      scale(0.3),
+      rotate(0),
+
+      animate(),
+      {
+        time: 0,
+        prevPos: center().clone(),
+      },
+      "enemy",
+    ]);
+
+    onUpdate(() => {
+      enemy.pos = enemy.pos.lerp(pet.pos, 0.01);
+    });
+
+    wait(rand(0, 5), () => {
+      spawnEnemy();
+    });
+  }
+  function spawnEnemy2() {
+    const pos2 = getOffscreenPosition();
+
+    const petTarget = pet.pos.clone();
+    const direction = petTarget.sub(pos2).unit().scale(400);
+
+    const enemy2 = add([
+      pos(pos2),
+      sprite("enemy2"),
+      anchor("center"),
+      area({ shape: new Polygon(hexPoints) }),
+      scale(0.3),
+      rotate(0),
+
+      animate(),
+      {
+        time: 0,
+        velocity: direction, // Save velocity
+      },
+      "enemy",
+    ]);
+
+    onUpdate(() => {
+      enemy2.move(enemy2.velocity);
+    });
+
+    wait(rand(0, 5), () => {
+      spawnEnemy2();
+    });
+  }
+
+  var ammoCount = 10;
+  var reloadCountdown = 2;
+  var isReloading = false;
+  var reloadPosition;
+  var playerLives = 3;
+  var isAlive = true;
+
+  const pet = add([
+    pos(center()),
+    sprite("nublin"),
+    anchor("center"),
+    area(),
+    scale(0.3),
+    rotate(0), // Enable rotation
+    animate(),
+    {
+      time: 0,
+      prevPos: center().clone(),
+    },
+    "pet",
+  ]);
+
+  spawnEnemy();
+  spawnEnemy2();
+
+  onUpdate(() => {
+    if (!isReloading) {
+      const target = mousePos();
+      const direction = target.sub(pet.pos).unit();
+      const stopDist = 100;
+      const adjustedTarget = target.sub(direction.scale(stopDist));
+
+      pet.pos = pet.pos.lerp(adjustedTarget, 0.1);
+
+      const angle = Math.atan2(direction.y, direction.x);
+      pet.angle = rad2deg(angle);
+
+      pet.prevPos = pet.pos.clone();
+    } else {
+      pet.pos = pet.pos.lerp(reloadPosition, 0.1);
+    }
+  });
+
+  if (isAlive) {
+    onClick(() => {
+      debug.log(ammoCount);
+      if (ammoCount > 0 && !isReloading) {
+        const flame = add([
+          pos(pet.pos),
+          sprite("flame"),
+          anchor("center"),
+          area(),
+          scale(0.3),
+          rotate(0), // Enable rotation
+          move(pet.angle, 1200),
+          "flame",
+        ]);
+
+        wait(3, () => {
+          flame.destroy();
+        });
+
+        ammoCount--;
+      }
+    });
+  }
+
+  pet.onUpdate(() => {
+    debug.log(isReloading);
+
+    onKeyPress("r", () => {
+      reloadPosition = mousePos();
+      isReloading = true;
+    });
+
+    if (isReloading) {
+      reloadCountdown -= dt();
+      if (reloadCountdown <= 0) {
+        isReloading = false;
+        reloadCountdown = 3;
+        ammoCount = 10;
+      }
+    }
+  });
+
+  onCollide("pet", "enemy", () => {
+    shake();
+    playerLives--;
+    if (playerLives <= 0) {
+      pet.destroy();
+      isAlive = false;
+    }
+  });
+
+  onCollide("enemy", "flame", (f, e) => {
+    f.destroy();
+    e.destroy();
+    shake();
   });
 });
 
