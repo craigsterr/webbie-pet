@@ -12,7 +12,6 @@ loadSprite("nublin", "/sprites/pets/nublin.png");
 loadSprite("werm", "/sprites/pets/werm.png");
 loadSprite("eye", "/sprites/pets/eye.png");
 loadSprite("bg_day", "/sprites/backgrounds/morning_bg.png");
-loadSprite("bg_night", "/sprites/backgrounds/night_bg.png");
 loadSprite("button_feed", "/sprites/buttons/button_feed.png");
 loadSprite("button_feed_pressed", "/sprites/buttons/button_feed_pushed.png");
 loadSprite("button_kill", "/sprites/buttons/button_kill.png");
@@ -468,6 +467,9 @@ scene("main", () => {
 loadSprite("flame", "/sprites/particles/effect_flame.png");
 loadSprite("enemy", "/sprites/objects/enemy.png");
 loadSprite("enemy2", "/sprites/objects/enemy2.png");
+loadSound("bullet", "/sounds/bullet.wav");
+loadSound("reload", "/sounds/reload.mp3");
+loadSprite("bg_night", "/sprites/backgrounds/night_bg.png");
 
 const hexScale = 250;
 
@@ -569,7 +571,7 @@ scene("play", () => {
   }
 
   var ammoCount = 10;
-  var reloadCountdown = 2;
+  var reloadCountdown = 1.5;
   var isReloading = false;
   var reloadPosition;
   var playerLives = 3;
@@ -613,15 +615,15 @@ scene("play", () => {
 
   if (isAlive) {
     onClick(() => {
-      debug.log(ammoCount);
       if (ammoCount > 0 && !isReloading) {
+        play("bullet", { volume: 0.2 });
         const flame = add([
           pos(pet.pos),
           sprite("flame"),
           anchor("center"),
           area(),
           scale(0.3),
-          rotate(0), // Enable rotation
+          rotate(0),
           move(pet.angle, 1200),
           "flame",
         ]);
@@ -636,20 +638,21 @@ scene("play", () => {
   }
 
   pet.onUpdate(() => {
-    debug.log(isReloading);
-
-    onKeyPress("r", () => {
-      reloadPosition = mousePos();
-      isReloading = true;
-    });
-
     if (isReloading) {
       reloadCountdown -= dt();
       if (reloadCountdown <= 0) {
         isReloading = false;
-        reloadCountdown = 3;
+        reloadCountdown = 1.5;
         ammoCount = 10;
       }
+    }
+  });
+
+  onKeyPress("r", () => {
+    if (!isReloading) {
+      reloadPosition = mousePos();
+      isReloading = true;
+      play("reload");
     }
   });
 
@@ -657,8 +660,15 @@ scene("play", () => {
     shake();
     playerLives--;
     if (playerLives <= 0) {
+      addTextBubble({
+        message: "u dun killt me 💀",
+        x: pet.pos.x,
+        y: pet.pos.y,
+      });
       pet.destroy();
       isAlive = false;
+    } else {
+      addTextBubble({ message: "yowch!", x: pet.pos.x, y: pet.pos.y });
     }
   });
 
