@@ -6,4 +6,6 @@ import "./scenes/pet-game.js";
 
 // Load  play scene assets
 
-go("main");
+// go("main");
+go("play");
+r;

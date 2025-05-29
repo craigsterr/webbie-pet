@@ -40,7 +40,9 @@ scene("play", () => {
     });
 
     wait(rand(0, 4 - difficulty / 100), () => {
-      spawnEnemy();
+      if (isAlive) {
+        spawnEnemy();
+      }
     });
   }
   function spawnEnemy2() {
@@ -73,10 +75,10 @@ scene("play", () => {
       enemy2.move(enemy2.velocity);
     });
 
-    debug.log(4 - difficulty / 100);
-
     wait(rand(0, 4 - difficulty / 100), () => {
-      spawnEnemy2();
+      if (isAlive) {
+        spawnEnemy2();
+      }
     });
   }
 
@@ -162,7 +164,9 @@ scene("play", () => {
     // debug.log(4 - difficulty / 100);
 
     wait(rand(0, 4 - difficulty / 100), () => {
-      spawnEnemyProjectile();
+      if (isAlive) {
+        spawnEnemyProjectile();
+      }
     });
   }
   var difficulty = 0;
@@ -211,8 +215,31 @@ scene("play", () => {
     }
   });
 
+  var flamesArray = [];
+
+  function updateAmmoBar() {
+    for (const f of flamesArray) {
+      f.destroy();
+    }
+    flamesArray = [];
+
+    for (var i = 0; i < ammoCount; i++) {
+      const flame = add([
+        pos(width() - 100 - i * 50, height() - 100),
+        sprite("flame"),
+        scale(0.2),
+        opacity(1),
+      ]);
+
+      flamesArray[i] = flame;
+    }
+
+    debug.log(flamesArray.length);
+  }
+
   if (isAlive) {
     onClick(() => {
+      updateAmmoBar();
       if (ammoCount > 0 && !isReloading) {
         play("bullet", { volume: 0.2 });
         const flame = add([
@@ -242,6 +269,7 @@ scene("play", () => {
         isReloading = false;
         reloadCountdown = 0.9;
         ammoCount = 10;
+        updateAmmoBar();
       }
     }
   });
@@ -275,6 +303,9 @@ scene("play", () => {
     }
   });
 
+  var score = 0;
+  var bubbleText;
+
   onCollide("destructable", "flame", (f, e) => {
     f.destroy();
     e.destroy();
@@ -293,30 +324,39 @@ scene("play", () => {
 
     comboCount++;
     comboCountdown = 0.5;
+    if (bubbleText) {
+      bubbleText.destroy();
+    }
+    bubbleText = bubble.add([
+      pos(10, 10),
+      scale(2),
+      text(`Score: ${score}`, {
+        size: 26,
+        opacity: 1,
+      }),
+      color(BLACK),
+    ]);
 
     switch (comboCount) {
       case 1:
-        debug.log("play1");
         play("combo1");
         break;
       case 2:
-        debug.log("play2");
         play("combo2");
 
         break;
       case 3:
-        debug.log("play3");
         play("combo3");
         break;
       case 4:
-        debug.log("play4");
         play("combo4");
         break;
       case 5:
-        debug.log("play5");
         play("combo5");
         break;
     }
+
+    score += comboCount * 10;
   });
 
   onUpdate(() => {
@@ -328,6 +368,23 @@ scene("play", () => {
       }
     }
   });
+
+  // UI
+
+  // Score bubble
+  const bubble = add([
+    pos(10, 10),
+    rect(400, 100, { radius: 8 }),
+    outline(4, BLACK),
+    scale(0.5),
+    opacity(1),
+    {
+      time: 0,
+      scaleTime: 0,
+    },
+  ]);
+
+  // Ammo
 
   // FOR DEBUGGING
   onKeyPress("p", () => {
