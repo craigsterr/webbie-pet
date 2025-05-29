@@ -163,7 +163,7 @@ scene("play", () => {
 
     // debug.log(4 - difficulty / 100);
 
-    wait(rand(0, 4 - difficulty / 100), () => {
+    wait(rand(0, 6 - difficulty / 100), () => {
       if (isAlive) {
         spawnEnemyProjectile();
       }
@@ -198,7 +198,7 @@ scene("play", () => {
 
   onUpdate(() => {
     difficulty += dt();
-    if (!isReloading) {
+    if (!isReloading && !isDashing) {
       const target = mousePos();
       const direction = target.sub(pet.pos).unit();
       const stopDist = 100;
@@ -210,8 +210,14 @@ scene("play", () => {
       pet.angle = rad2deg(angle);
 
       pet.prevPos = pet.pos.clone();
-    } else {
+    } else if (isReloading) {
       pet.pos = pet.pos.lerp(reloadPosition, 0.1);
+    } else if (isDashing) {
+      const dashDir = dashPosition.sub(pet.pos);
+      pet.angle = dashDir.angle(); // Kaboom uses radians
+
+      // Move toward the dashPosition
+      pet.pos = pet.pos.lerp(dashPosition, 0.4);
     }
   });
 
@@ -225,8 +231,8 @@ scene("play", () => {
 
     for (var i = 0; i < ammoCount; i++) {
       const flame = add([
-        pos(width() - 100 - i * 50, height() - 100),
-        sprite("flame"),
+        pos(width() - 70 - i * 30, height() - 50),
+        sprite("ammo"),
         scale(0.2),
         opacity(1),
       ]);
@@ -235,6 +241,28 @@ scene("play", () => {
     }
 
     debug.log(flamesArray.length);
+  }
+
+  var healthArray = [];
+
+  function updateHealthBar() {
+    for (const h of healthArray) {
+      h.destroy();
+    }
+    healthArray = [];
+
+    for (var i = 0; i < playerLives; i++) {
+      const health = add([
+        pos(width() - 100 - i * 70, 20),
+        sprite("heart"),
+        scale(0.2),
+        opacity(1),
+      ]);
+
+      healthArray[i] = health;
+    }
+
+    debug.log(healthArray.length);
   }
 
   if (isAlive) {
@@ -258,6 +286,8 @@ scene("play", () => {
         });
 
         ammoCount--;
+      } else {
+        play("empty");
       }
     });
   }
@@ -272,34 +302,93 @@ scene("play", () => {
         updateAmmoBar();
       }
     }
+    if (isDashing) {
+      dashCountdown -= dt();
+      if (dashCountdown <= 0) {
+        isDashing = false;
+        dashCountdown = 1;
+      }
+    }
   });
 
   onKeyPress("r", () => {
-    if (!isReloading) {
+    if (!isDashing) {
       reloadPosition = mousePos();
       isReloading = true;
       play("reload");
     }
   });
 
+  var isDashing = false;
+  var isInvulnerable = false;
+  var dashPosition;
+  var dashCountdown = 1;
+  var dashDist = 300;
+
+  onKeyPress("w", () => {
+    if (!isDashing) {
+      dashPosition = vec2(pet.pos.x, pet.pos.y - dashDist);
+      isDashing = true;
+      play("dash", { volume: 0.3 });
+    }
+  });
+  onKeyPress("a", () => {
+    if (!isDashing) {
+      dashPosition = vec2(pet.pos.x - dashDist, pet.pos.y);
+      isDashing = true;
+      play("dash", { volume: 0.3 });
+    }
+  });
+  onKeyPress("s", () => {
+    if (!isDashing) {
+      dashPosition = vec2(pet.pos.x, pet.pos.y + dashDist);
+      isDashing = true;
+      play("dash", { volume: 0.3 });
+    }
+  });
+  onKeyPress("d", () => {
+    if (!isDashing) {
+      dashPosition = vec2(pet.pos.x + dashDist, pet.pos.y);
+      isDashing = true;
+      play("dash", { volume: 0.3 });
+    }
+  });
+
   var comboCountdown = 0.2;
   var comboCount = 0;
 
-  onCollide("pet", "enemy", () => {
-    play("hurt");
-    shake();
-    playerLives--;
-    if (playerLives <= 0) {
-      music.paused = true;
-      addTextBubble({
-        message: "u dun killt me 💀",
-        x: pet.pos.x,
-        y: pet.pos.y,
-      });
-      pet.destroy();
-      isAlive = false;
+  onCollide("pet", "enemy", (p, e) => {
+    if (!isDashing) {
+      play("hurt");
+      shake();
+      playerLives--;
+      updateHealthBar();
+      if (playerLives <= 0) {
+        music.paused = true;
+        addTextBubble({
+          message: "u dun killt me 💀",
+          x: pet.pos.x,
+          y: pet.pos.y,
+        });
+        pet.destroy();
+        isAlive = false;
+      } else {
+        addTextBubble({ message: "yowch!", x: pet.pos.x, y: pet.pos.y });
+      }
     } else {
-      addTextBubble({ message: "yowch!", x: pet.pos.x, y: pet.pos.y });
+      e.destroy();
+      play("punch", { volume: 0.2 });
+      wait(0.4, () => {
+        play("bell", { volume: 0.4 });
+      });
+
+      explodeParticles(
+        "hit",
+        "/sprites/particles/effect_hit.png",
+        e.pos.x,
+        e.pos.y
+      );
+      shake();
     }
   });
 
@@ -384,7 +473,8 @@ scene("play", () => {
     },
   ]);
 
-  // Ammo
+  updateHealthBar();
+  updateAmmoBar();
 
   // FOR DEBUGGING
   onKeyPress("p", () => {

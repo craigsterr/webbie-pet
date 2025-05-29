@@ -8,4 +8,3 @@ import "./scenes/pet-game.js";
 
 // go("main");
 go("play");
-r;
