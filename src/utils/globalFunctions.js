@@ -109,7 +109,7 @@ export function addTextBubble({
 
       if (bubble.time > 2) {
         bubble.opacity -= dt();
-        bubbleText.opacity -= dt() / 2;
+        bubbleText.destroy();
       }
     });
   }
