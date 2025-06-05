@@ -62,15 +62,15 @@ scene("shop", () => {
         area(),
       ]);
 
-      add([
-        anchor("center"),
-        color(BLACK),
-        text("add munny +10"),
-        layer("ui"),
-        area(),
-        item,
-        "addMunny",
-      ]);
+      // add([
+      //   anchor("center"),
+      //   color(BLACK),
+      //   text("add munny +10"),
+      //   layer("ui"),
+      //   area(),
+      //   item,
+      //   "addMunny",
+      // ]);
     }
 
     if (!itemsExist) {
@@ -110,12 +110,12 @@ scene("shop", () => {
     }
   });
 
-  onClick("addMunny", (item) => {
-    setMunny(munny + 10);
-    addTextBubble({ message: `You added 10 munny!` });
-    play("click");
-    updateMunnyBubbleText();
-  });
+  // onClick("addMunny", (item) => {
+  //   setMunny(munny + 10);
+  //   addTextBubble({ message: `You added 10 munny!` });
+  //   play("click");
+  //   updateMunnyBubbleText();
+  // });
 
   const buttonShop = add([
     pos(width() - 100, 60),
