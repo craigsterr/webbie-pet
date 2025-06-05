@@ -57,42 +57,62 @@ export function addTextBubble({
   x = center().x,
   y = center().y - 200,
 } = {}) {
-  play("beep", {
-    volume: 1, // set the volume to 50%
-  });
+  if (!isDead) {
+    play("beep", {
+      volume: 1, // set the volume to 50%
+    });
 
-  const bubble = add([
-    anchor("center"),
-    pos(x, y),
-    rect(400, 100, { radius: 8 }),
-    outline(4, BLACK),
-    scale(0.1),
-    opacity(1),
-    {
-      time: 0,
-      scaleTime: 0,
-    },
-  ]);
+    var newMessage = "";
+    const maxCharPerLine = 20;
+    var lineStart = 0;
 
-  const bubbleText = bubble.add([
-    anchor("center"),
-    text(message, {
-      size: 26,
-      opacity: 1,
-    }),
-    color(BLACK),
-  ]);
-
-  bubble.onUpdate(() => {
-    bubble.time += dt();
-
-    bubble.scaleTo(overshoot(bubble.time * 2));
-
-    if (bubble.time > 2) {
-      bubble.opacity -= dt();
-      bubbleText.opacity -= dt() / 2;
+    while (lineStart < message.length) {
+      // Find the next cutoff point
+      let cutoff = lineStart + maxCharPerLine;
+      if (cutoff >= message.length) {
+        newMessage += message.substring(lineStart);
+        break;
+      }
+      // Find the last space before cutoff
+      let lastSpace = message.lastIndexOf(" ", cutoff);
+      if (lastSpace <= lineStart) lastSpace = cutoff; // No space found, hard break
+      newMessage += message.substring(lineStart, lastSpace) + "\n";
+      lineStart = lastSpace + 1;
     }
-  });
+
+    const bubble = add([
+      anchor("center"),
+      pos(x, y),
+      rect(400, 100, { radius: 8 }),
+      outline(4, BLACK),
+      scale(0.1),
+      opacity(1),
+      {
+        time: 0,
+        scaleTime: 0,
+      },
+    ]);
+
+    const bubbleText = bubble.add([
+      anchor("center"),
+      text(newMessage, {
+        size: 26,
+        opacity: 1,
+      }),
+      color(BLACK),
+    ]);
+
+    bubble.onUpdate(() => {
+      bubble.time += dt();
+
+      bubble.scaleTo(overshoot(bubble.time * 2));
+
+      if (bubble.time > 2) {
+        bubble.opacity -= dt();
+        bubbleText.opacity -= dt() / 2;
+      }
+    });
+  }
 }
 
 const hexScale = 250;
@@ -168,3 +188,43 @@ export function explodeParticles(name, path, x, y) {
     particleEmitter.emit(5);
   });
 }
+
+export let isDead = false;
+export function setIsDead(val) {
+  isDead = val;
+}
+
+export let munny = 0;
+
+export function setMunny(val) {
+  munny = val;
+}
+
+export function updateMunnyBubbleText() {
+  const munnyBubble = add([
+    pos(10, 10),
+    rect(400, 100, { radius: 8 }),
+    outline(4, BLACK),
+    scale(0.5),
+    opacity(1),
+    {
+      time: 0,
+      scaleTime: 0,
+    },
+  ]);
+  munnyBubble.add([
+    pos(10, 10),
+    scale(2),
+    text(`munny: ${munny}`, {
+      size: 26,
+      opacity: 1,
+    }),
+    color(BLACK),
+  ]);
+}
+
+export const shopItems = [
+  { name: "werm", price: 100, sprite: "werm", bought: false },
+  { name: "eye", price: 250, sprite: "eye", bought: false },
+  { name: "hat", price: 50, sprite: "eye", bought: false },
+];

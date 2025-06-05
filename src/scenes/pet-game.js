@@ -1,5 +1,33 @@
 import "../kaplay.js";
-import { addParticles, addTextBubble } from "../utils/globalFunctions.js";
+import {
+  addParticles,
+  addTextBubble,
+  isDead,
+  setIsDead,
+  updateMunnyBubbleText,
+} from "../utils/globalFunctions.js";
+
+const randomMessages = [
+  "wah wah wah!!",
+  "u listen to da strokes?",
+  "*sniff* *sniff* did u shower?",
+  "i shure hope craig getshired lol",
+  "meow",
+  "i love u",
+  "heh hehhhhh...",
+  "im on my evil grind",
+  "im just chillen!",
+];
+
+function addRandomMessage() {
+  wait(rand(10, 30), () => {
+    if (!isDead) {
+      const message = randomMessages[randi(0, randomMessages.length - 1)];
+      addTextBubble({ message: message });
+    }
+    addRandomMessage();
+  });
+}
 
 scene("main", () => {
   function spawnRandomPoop() {
@@ -23,7 +51,7 @@ scene("main", () => {
           var randInt = randi(0, 10);
           if (randInt == 1) {
             addTextBubble({
-              message: "u betta wash ya hands\n b4 u feed me nasty :p",
+              message: "u betta wash ya hands b4 u feed me nasty :p",
             });
           }
 
@@ -60,7 +88,6 @@ scene("main", () => {
   let shrinkCountdown = 1;
   let beginShrinkTimer = false;
   let isStarving = false;
-  let isDead = false;
   let isIdle = true;
   let poopCount = 0;
   let loveMeter = 0;
@@ -126,12 +153,22 @@ scene("main", () => {
     "button_play",
   ]);
 
-  wait(lastClickTime - 0.5, () => {
-    addTextBubble({ message: "heh... ima pet!\ntakea good care of me >:3 " });
-  });
+  const buttonShop = add([
+    pos(width() - 100, 60),
+    sprite("button_shop"),
+    anchor("center"),
+    area(),
+    scale(0.7),
+    {
+      time: 0,
+    },
+    "button_shop",
+  ]);
+
+  updateMunnyBubbleText();
 
   wait(lastClickTime - 0.5, () => {
-    addTextBubble({ message: "heh... ima pet!\ntakea good care of me >:3 " });
+    addTextBubble({ message: "heh... ima pet!takea good care of me >:3 " });
   });
 
   pet.onUpdate(() => {
@@ -165,7 +202,7 @@ scene("main", () => {
     }
 
     if (foodMeter < 20 && !isStarving) {
-      addTextBubble({ message: "mannnn.....\n im hungy...." });
+      addTextBubble({ message: "mannnn..... im hungy...." });
       isStarving = true;
     } else if (foodMeter > 20 && isStarving) {
       isStarving = false;
@@ -174,7 +211,7 @@ scene("main", () => {
     if (isDead || (foodMeter <= 0 && !isDead)) {
       shake();
       addTextBubble({ message: "im dead asl 💀" });
-      isDead = true;
+      setIsDead(true);
       pet.destroy();
       const grave = add([
         pos(center()),
@@ -196,6 +233,7 @@ scene("main", () => {
   });
 
   spawnRandomPoop();
+  addRandomMessage();
 
   pet.onClick(() => {
     if (appleIsOut) {
@@ -235,30 +273,24 @@ scene("main", () => {
             mousePos().y
           );
           addTextBubble({
-            message: "im seriously gonna throw up\n get that away from mee",
+            message: "im seriously gonna throw up get that away from mee",
           });
           if (loveMeter > 0) {
             loveMeter--;
           }
         } else if (poopCount > 0) {
-          var randInt = randi(0, 2);
-          if (randInt == 1) {
-            addTextBubble({
-              message: "theres like.. poop\n right there. nasty",
-            });
-          }
+          addTextBubble({
+            message: "theres like.. poop right there. nasty",
+          });
           lastClickTime = time();
         } else {
-          var randInt = randi(0, 3);
-          if (randInt == 1) {
-            addTextBubble({ message: "im fucken fullll bro." });
-          }
+          addTextBubble({ message: "im rly fullll bro." });
           lastClickTime = time();
         }
       }
     } else {
       if (time() - lastClickTime >= clickCooldown) {
-        // addTextBubble({ message: "ya clickt me...\nwat a nicee click >:3" });
+        // addTextBubble({ message: "ya clickt me...wat a nicee click >:3" });
         lastClickTime = time();
 
         loveMeter++;
@@ -323,7 +355,7 @@ scene("main", () => {
   });
 
   onClick("button_kill", () => {
-    isDead = true;
+    setIsDead(true);
     buttonKill.sprite = "button_kill_pressed";
     wait(0.2, () => {
       buttonKill.sprite = "button_kill";
@@ -336,7 +368,20 @@ scene("main", () => {
     wait(0.2, () => {
       buttonPlay.sprite = "button_play";
     });
+    if (!isDead) {
+      go("play");
+    }
+  });
 
-    go("play");
+  onClick("button_shop", () => {
+    buttonShop.sprite = "button_shop_pressed";
+    play("click");
+    wait(0.2, () => {
+      buttonShop.sprite = "button_shop";
+
+      if (!isDead) {
+        go("shop");
+      }
+    });
   });
 });
