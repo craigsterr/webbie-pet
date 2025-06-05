@@ -19,8 +19,7 @@
 
 - HTML5 + CSS3
 - JavaScript (Vanilla or Framework if applicable)
-- [Optional] Kaplay for scene/state management
-- [Optional] Pygame (if desktop version is included)
+- Kaplay for scene/state management
 
 ---
 
