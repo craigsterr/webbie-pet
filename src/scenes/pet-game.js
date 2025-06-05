@@ -6,6 +6,9 @@ import {
   setIsDead,
   updateMunnyBubbleText,
   petType,
+  setMunny,
+  setPetType,
+  shopItems,
 } from "../utils/globalFunctions.js";
 
 const randomMessages = [
@@ -336,9 +339,7 @@ scene("main", () => {
 
     buttonFeed.sprite = "button_feed_pressed";
 
-    play("click", {
-      volume: 0.3,
-    });
+    play("click", {});
 
     appleIsOut = !appleIsOut;
 
@@ -356,6 +357,7 @@ scene("main", () => {
   });
 
   onClick("button_kill", () => {
+    addTextBubble({ message: "why did u do that\n(PRESS R TO RESET)" });
     setIsDead(true);
     buttonKill.sprite = "button_kill_pressed";
     wait(0.2, () => {
@@ -374,6 +376,14 @@ scene("main", () => {
     }
   });
 
+  onKeyPress("r", () => {
+    setMunny(0);
+    setIsDead(false);
+    setPetType("nublin");
+    shopItems.forEach((item) => (item.bought = false));
+    // Reset other state here if needed
+    go("main");
+  });
   onClick("button_shop", () => {
     buttonShop.sprite = "button_shop_pressed";
     play("click");

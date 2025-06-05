@@ -201,10 +201,10 @@ scene("play", () => {
   updateMunnyBubbleText();
 
   // FOR DEBUGGING
-  onKeyPress("p", () => {
-    music.stop();
-    go("play");
-  });
+  // onKeyPress("p", () => {
+  //   music.stop();
+  //   go("play");
+  // });
 
   const buttonShop = add([
     pos(width() - 100, 60),

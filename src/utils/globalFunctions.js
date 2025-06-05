@@ -63,7 +63,7 @@ export function addTextBubble({
     });
 
     var newMessage = "";
-    const maxCharPerLine = 20;
+    const maxCharPerLine = 25;
     var lineStart = 0;
 
     while (lineStart < message.length) {
