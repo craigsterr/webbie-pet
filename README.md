@@ -1,27 +1,33 @@
-# Folder structure
+# 🐾 Webbie Pet
 
-- `src` - source code for your kaplay project
-- `dist` - distribution folder, contains your index.html, built js bundle and static assets
+**Webbie Pet** is a virtual pet browser game where you raise, feed, clean, and play with your own digital companion. Inspired by Tamagotchi-style games, Webbie Pet lets you care for your pet, play simple minigames, and keep it happy and healthy!
 
+---
 
-## Development
+## 🚀 Features
 
-```sh
-$ npm run dev
-```
+- 🎨 Customizable virtual pet
+- 🕒 Real-time life simulation (hunger, hygiene, mood)
+- 🍎 Feed, clean, and interact with your pet
+- 🎮 Minigames (like Coin Catcher) to boost happiness
+- 💬 Simple UI with animations and feedback
+- 💾 Local save support (pet state persists in browser)
 
-will start a dev server at http://localhost:8000
+---
 
-## Distribution
+## 🖥️ Tech Stack
 
-```sh
-$ npm run build
-```
+- HTML5 + CSS3
+- JavaScript (Vanilla or Framework if applicable)
+- [Optional] Kaplay for scene/state management
+- [Optional] Pygame (if desktop version is included)
 
-will build your js files into `dist/`
+---
 
-```sh
-$ npm run zip
-```
+## 📦 Installation
 
-will build your game and package into a .zip file, you can upload to your server or itch.io / newground etc.
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/yourusername/webbie-pet.git
+cd webbie-pet
