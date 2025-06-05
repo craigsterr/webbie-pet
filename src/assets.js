@@ -26,6 +26,7 @@ loadSprite("ammo", "/sprites/objects/ammo_icon.png");
 loadSprite("wizard", "/sprites/wizard.png");
 loadSprite("button_exit", "/sprites/buttons/button_exit.png");
 loadSprite("button_exit_pushed", "/sprites/buttons/button_exit_pushed.png");
+loadSprite("guy", "/sprites/craig-logo.png");
 
 loadSound("beep", "/sounds/beep.mp3");
 loadSound("click", "/sounds/click.mp3");

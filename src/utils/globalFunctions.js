@@ -224,7 +224,12 @@ export function updateMunnyBubbleText() {
 }
 
 export const shopItems = [
+  { name: "guy", price: 50, sprite: "logo", bought: false },
   { name: "werm", price: 100, sprite: "werm", bought: false },
-  { name: "eye", price: 250, sprite: "eye", bought: false },
-  { name: "hat", price: 50, sprite: "eye", bought: false },
+  { name: "eye", price: 200, sprite: "eye", bought: false },
 ];
+
+export var petType = "nublin";
+export function setPetType(type) {
+  petType = type;
+}

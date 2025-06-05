@@ -5,6 +5,7 @@ import {
   isDead,
   setIsDead,
   updateMunnyBubbleText,
+  petType,
 } from "../utils/globalFunctions.js";
 
 const randomMessages = [
@@ -104,7 +105,7 @@ scene("main", () => {
 
   const pet = add([
     pos(center()),
-    sprite("nublin"),
+    sprite(petType),
     anchor("center"),
     area(),
     scale(0.5),
@@ -309,14 +310,14 @@ scene("main", () => {
     }
   });
 
-  onKeyPress("a", () => {
-    petIterator = (petIterator - 1 + petArray.length) % petArray.length;
-    pet.sprite = petArray[petIterator];
-  });
-  onKeyPress("d", () => {
-    petIterator = (petIterator + 1) % 3;
-    pet.sprite = petArray[petIterator];
-  });
+  // onKeyPress("a", () => {
+  //   petIterator = (petIterator - 1 + petArray.length) % petArray.length;
+  //   pet.sprite = petArray[petIterator];
+  // });
+  // onKeyPress("d", () => {
+  //   petIterator = (petIterator + 1) % 3;
+  //   pet.sprite = petArray[petIterator];
+  // });
 
   // Button event handlers
 

@@ -5,6 +5,7 @@ import {
   updateMunnyBubbleText,
   addTextBubble,
   shopItems,
+  setPetType,
 } from "../utils/globalFunctions.js";
 
 scene("shop", () => {
@@ -61,19 +62,21 @@ scene("shop", () => {
         area(),
       ]);
 
-      add([
-        anchor("center"),
-        color(BLACK),
-        text("add munny +10"),
-        layer("ui"),
-        area(),
-        item,
-        "addMunny",
-      ]);
+      // add([
+      //   anchor("center"),
+      //   color(BLACK),
+      //   text("add munny +10"),
+      //   layer("ui"),
+      //   area(),
+      //   item,
+      //   "addMunny",
+      // ]);
     }
 
     if (!itemsExist) {
       addTextBubble({ message: "my items are gone youve ruined me" });
+    } else {
+      addTextBubble({ message: "welcome to my shop!" });
     }
   });
 
@@ -85,6 +88,7 @@ scene("shop", () => {
       updateMunnyBubbleText();
       item.destroy();
       item.bought = true;
+      setPetType(item.name);
     } else {
       const randInt = randi(0, 10);
 
@@ -106,12 +110,12 @@ scene("shop", () => {
     }
   });
 
-  onClick("addMunny", (item) => {
-    setMunny(munny + 10);
-    addTextBubble({ message: `You added 10 munny!` });
-    play("click");
-    updateMunnyBubbleText();
-  });
+  // onClick("addMunny", (item) => {
+  //   setMunny(munny + 10);
+  //   addTextBubble({ message: `You added 10 munny!` });
+  //   play("click");
+  //   updateMunnyBubbleText();
+  // });
 
   const buttonShop = add([
     pos(width() - 100, 60),

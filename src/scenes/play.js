@@ -1,8 +1,9 @@
 import "../kaplay.js";
 import {
-  addParticles,
   addTextBubble,
+  addParticles,
   munny,
+  petType,
   setMunny,
   updateMunnyBubbleText,
 } from "../utils/globalFunctions.js";
@@ -36,7 +37,7 @@ scene("play", () => {
 
   const pet = add([
     pos(center().x, height() - 100),
-    sprite("nublin"),
+    sprite(petType),
     anchor("center"),
     area(),
     scale(0.2),
@@ -75,7 +76,7 @@ scene("play", () => {
 
     for (var i = 0; i < playerLives; i++) {
       const health = add([
-        pos(width() - 100 - i * 70, 20),
+        pos(160 - i * 70, 70),
         sprite("heart"),
         scale(0.2),
         opacity(1),
@@ -115,9 +116,9 @@ scene("play", () => {
     if (score % 100 === 0) {
       wait(0.5, () => {
         play("bell");
-        setMunny(munny + 5);
+        setMunny(munny + 10);
         updateMunnyBubbleText();
-        munnyEarned += 5;
+        munnyEarned += 10;
       });
     }
   });
@@ -205,8 +206,26 @@ scene("play", () => {
     go("play");
   });
 
-  onKeyPress("escape", () => {
-    music.stop("night_song");
-    go("main");
+  const buttonShop = add([
+    pos(width() - 100, 60),
+    sprite("button_exit"),
+    anchor("center"),
+    area(),
+    scale(0.7),
+    {
+      time: 0,
+    },
+    "button_exit",
+  ]);
+
+  onClick("button_exit", () => {
+    play("click");
+    buttonShop.sprite = "button_exit_pushed";
+
+    wait(0.2, () => {
+      buttonShop.sprite = "button_exit";
+      music.stop("night_song");
+      go("main");
+    });
   });
 });
